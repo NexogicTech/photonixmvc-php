@@ -1,0 +1,10 @@
+{
+  "name": "nexogic/photonixcore",
+  "autoload": {
+    "psr-4": {
+      "App\\": "app/",
+      "PhotonixApp\\": "app/",
+      "PhotonixCore\\": "PhotonixCore/"
+    }
+  }
+}
