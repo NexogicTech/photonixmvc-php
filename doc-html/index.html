@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Photonix 文档</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/php.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/css.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/json.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/sql.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/bash.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/yaml.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/xml.min.js"></script>
+</head>
+<body>
+    <header class="navbar">
+        <div class="navbar-brand">
+            <button id="sidebar-toggle" class="btn-icon" aria-label="切换侧边栏">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
+            </button>
+            <h1>Photonix 文档</h1>
+        </div>
+        <div class="navbar-actions">
+            <input type="search" id="search-input" placeholder="搜索文档..." aria-label="搜索">
+        </div>
+    </header>
+
+    <div class="container">
+        <aside id="sidebar" class="sidebar" aria-label="文档导航">
+            <div class="sidebar-header">
+                <button id="sidebar-close" class="btn-icon close" aria-label="关闭侧边栏">×</button>
+            </div>
+            <nav id="sidebar-nav" class="sidebar-nav"></nav>
+        </aside>
+
+        <main id="content" class="content" role="main">
+            <div id="content-loading" class="loading">加载中...</div>
+            <article id="content-body" class="content-body"></article>
+        </main>
+    </div>
+
+    <script src="assets/js/markdown.js"></script>
+    <script src="assets/js/app.js"></script>
+</body>
+</html>
