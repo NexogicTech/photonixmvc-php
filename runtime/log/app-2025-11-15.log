@@ -1,0 +1,2 @@
+2025-11-15 10:59:16 [ERROR] Optional parameter $name declared before required parameter $request is implicitly treated as a required parameter {"severity":8192,"file":"E:\\PhotonixCore\\app\\home\\controller\\index.php","line":18}
+2025-11-15 10:59:16 [ERROR] Optional parameter $name declared before required parameter $request is implicitly treated as a required parameter {"severity":8192,"file":"E:\\PhotonixCore\\app\\home\\controller\\index.php","line":18}
