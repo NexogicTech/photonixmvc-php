@@ -1,8 +1,43 @@
 <?php
 
-// Unified router for static files and app front controller.
-// - If running with PHP built-in server (cli-server), return false to let it serve files.
-// - Otherwise stream files manually (e.g., when used behind other setups).
+// 统一路由：处理静态资源与应用前端控制器
+// - 在 PHP 内置服务器 (cli-server) 下，返回 false 交由其直接服务静态文件
+// - 其他环境中，手动输出静态文件；否则回退到前端控制器处理动态路由
+
+$__renderError = function () {
+    $file = __DIR__ . '/../config/error.php';
+    $data = is_file($file) ? require $file : [];
+    $html = is_array($data) && isset($data['error']) ? $data['error'] : '<center><h1>服务器发生错误</h1></center>';
+    http_response_code(500);
+    echo $html;
+};
+
+require_once __DIR__ . '/../vendor/autoload.php';
+
+use PhotonixCore\Logger;
+
+ini_set('display_errors', '0');
+error_reporting(E_ALL);
+
+set_error_handler(function ($severity, $message, $file, $line) use ($__renderError) {
+    Logger::error($message, ['severity' => $severity, 'file' => $file, 'line' => $line]);
+    $__renderError();
+    exit;
+});
+
+set_exception_handler(function ($e) use ($__renderError) {
+    Logger::error($e->getMessage(), ['file' => $e->getFile(), 'line' => $e->getLine()]);
+    $__renderError();
+    exit;
+});
+
+register_shutdown_function(function () use ($__renderError) {
+    $e = error_get_last();
+    if ($e) {
+        Logger::error($e['message'] ?? 'shutdown', ['severity' => $e['type'] ?? null, 'file' => $e['file'] ?? null, 'line' => $e['line'] ?? null]);
+        $__renderError();
+    }
+});
 
 $docRoot = $_SERVER['DOCUMENT_ROOT'] ?? __DIR__;
 $docRootReal = realpath($docRoot) ?: $docRoot;
@@ -42,7 +77,7 @@ if ($resolved !== false && strpos($resolved, $docRootReal) === 0 && is_file($res
     }
 }
 
-// Favicon fallback: serve png/svg if .ico is missing
+// Favicon 兜底：若缺少 .ico 则尝试返回 png/svg
 if ($path === '/favicon.ico') {
     $png = $docRootReal . '/favicon.png';
     $svg = $docRootReal . '/favicon.svg';

@@ -12,5 +12,7 @@ return [
     "view_code_display_r" => " %} ",
 
     // 启模板动编译
-    "view_code_use_cached" => true
+    "view_code_use_cached" => true,
+    // 启动加密
+    "view_code_use_encrypt" => true
 ];

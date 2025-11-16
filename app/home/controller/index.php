@@ -27,6 +27,7 @@ class Index extends baseController
 
     public function version(Request $request): string
     {
+        View::assign('version', Photonix::version());
         return View::display("home");
     }
 }

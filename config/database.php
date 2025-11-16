@@ -3,7 +3,7 @@ use PhotonixCore\Env;
 
 return [
     // 数据库种类
-    "sql_type" => "mysql",
+    "sql_type" => Env::env("DB_TYPE", "mysql"),
     // 数据库地址
     "sql_host" => Env::env("DB_HOST", "localhost"),
     // 数据库用户名

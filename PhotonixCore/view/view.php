@@ -8,13 +8,39 @@ class View
 {
     protected static array $config = [];
     protected static array $sharedVars = [];
+    protected static string $configFile = '';
+    protected static int $configMtime = 0;
+
+    protected static function compiledPrologue(): string
+    {
+        return <<<'PHP'
+<?php
+// +----------------------------------------------------------------------
+// | Nexogic Photonix MVC 模板
+// +----------------------------------------------------------------------
+// | 版权 (c) 2025 http://www.nexogic.org 保留所有权利
+// +----------------------------------------------------------------------
+// | 许可证 (MIT): https://opensource.org/license/MIT
+// +----------------------------------------------------------------------
+// | 作者: HelixDev <dev@nexogic.org>
+// +----------------------------------------------------------------------
+
+if (version_compare(PHP_VERSION, '8.0.0', '<')) {
+    die('Photonix MVC require PHP > 8.0.0 !');
+}
+?>
+PHP;
+    }
 
     protected static function loadConfig(): array
     {
-        if (!self::$config) {
-            $root = Photonix::getAppRootPath();
-            $file = $root . 'config/view.php';
+        $root = Photonix::getAppRootPath();
+        $file = $root . 'config/view.php';
+        $mtime = is_file($file) ? (int)filemtime($file) : 0;
+        if (!self::$config || self::$configFile !== $file || $mtime > self::$configMtime) {
             self::$config = is_file($file) ? (array)require $file : [];
+            self::$configFile = $file;
+            self::$configMtime = $mtime;
         }
         return self::$config;
     }
@@ -34,7 +60,25 @@ class View
         $codeR = $cfg['view_code_display_r'] ?? ' %} ';
         $s = $source;
         $s = preg_replace('/' . preg_quote($codeL, '/') . '(.*?)' . preg_quote($codeR, '/') . '/s', '<?php $1 ?>', $s);
-        $s = preg_replace('/' . preg_quote($varL, '/') . '(.*?)' . preg_quote($varR, '/') . '/s', '<?= $1 ?>', $s);
+        $s = preg_replace_callback('/' . preg_quote($varL, '/') . '(.*?)' . preg_quote($varR, '/') . '/s', function ($m) {
+            $raw = trim($m[1]);
+            $exprPart = $raw;
+            $modsPart = '';
+            $pos = strpos($raw, '|');
+            if ($pos !== false) {
+                $exprPart = trim(substr($raw, 0, $pos));
+                $modsPart = trim(substr($raw, $pos + 1));
+            }
+            if ($exprPart !== '' && $exprPart[0] === '$') {
+                $expr = $exprPart;
+            } else {
+                $expr = View::toPhpVar($exprPart);
+            }
+            if ($modsPart !== '') {
+                $expr = View::applyModifiers($expr, $modsPart);
+            }
+            return '<?= ' . $expr . ' ?>';
+        }, $s);
         $s = preg_replace_callback('/\{\$([A-Za-z_][A-Za-z0-9_\.\[\]]*)(?:\|([^}]+))?\}/', function ($m) {
             $expr = View::toPhpVar($m[1]);
             if (!empty($m[2])) {
@@ -113,6 +157,13 @@ class View
         return $out;
     }
 
+    protected static function minifyHtml(string $s): string
+    {
+        $s = str_replace(["\r", "\n"], '', $s);
+        $s = preg_replace('/>\s+</', '><', $s);
+        return $s;
+    }
+
     public static function display(string $tpl_path, $type = 'cached', array $vars = []): string
     {
         $cfg = self::loadConfig();
@@ -128,9 +179,19 @@ class View
         self::ensureCachedDir($cachedDir);
         $cacheFile = $cachedDir . '/' . md5($tpl) . '.php';
         $useCached = (bool)($cfg['view_code_use_cached'] ?? true);
-        if (!$useCached || !is_file($cacheFile) || (is_file($tpl) && filemtime($tpl) > filemtime($cacheFile))) {
+        $engineMtime = @filemtime(__FILE__);
+        $cacheMtime = is_file($cacheFile) ? @filemtime($cacheFile) : 0;
+        $configMtime = self::$configMtime;
+        if (
+            !$useCached ||
+            !is_file($cacheFile) ||
+            (is_file($tpl) && filemtime($tpl) > $cacheMtime) ||
+            ($engineMtime && $engineMtime > $cacheMtime) ||
+            ($configMtime && $configMtime > $cacheMtime)
+        ) {
             $src = is_file($tpl) ? file_get_contents($tpl) : '';
             $compiled = self::compileTemplate($src, $cfg);
+            $compiled = self::compiledPrologue() . $compiled;
             file_put_contents($cacheFile, $compiled);
         }
         ob_start();
@@ -142,7 +203,11 @@ class View
             extract($scope, EXTR_OVERWRITE);
         }
         include $cacheFile;
-        return ob_get_clean();
+        $out = ob_get_clean();
+        if (!empty($cfg['view_code_use_encrypt'])) {
+            $out = self::minifyHtml($out);
+        }
+        return $out;
     }
 
     public static function assign(string $var, $value): void

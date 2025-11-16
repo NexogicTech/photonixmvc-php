@@ -10,4 +10,4 @@ Routes::get("/{name}/hello/", "App\\Home\\Controller\\Index/hello");
 // 允许不传 name，使用控制器方法默认值
 Routes::get("/hello", "App\\Home\\Controller\\Index/hello");
 
-Routes::get("/a", "App\\Home\\Controller\\Index/version");
+Routes::get("/version", "App\\Home\\Controller\\Index/version");
