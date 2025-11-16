@@ -1,5 +1,7 @@
 {
   "name": "nexogic/photonixmvc",
+  "type": "project",
+  "description": "PHP MVC framework PhotonixMVC",
   "license": "MIT",
   "autoload": {
     "psr-4": {
